@@ -1,17 +1,13 @@
 import mongoose from "mongoose";
 import * as argon2 from "argon2";
+import { UserSchema } from "../schemas/create-user-schema";
 
 export enum USER_ROLES {
   ADMIN = "ADMIN",
   USER = "USER",
 }
 
-interface User {
-  name: string;
-  email: string;
-  password: string;
-  role?: USER_ROLES;
-}
+type User = UserSchema["body"];
 
 export interface UserDocument extends User, mongoose.Document {
   createdAt: Date;
