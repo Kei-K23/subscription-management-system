@@ -7,9 +7,9 @@ export enum USER_ROLES {
   USER = "USER",
 }
 
-type User = UserSchema["body"];
+export type UserInput = UserSchema["body"];
 
-export interface UserDocument extends User, mongoose.Document {
+export interface UserDocument extends UserInput, mongoose.Document {
   createdAt: Date;
   updatedAt: Date;
   comparePassword(plainPassword: string): Promise<boolean>;
@@ -44,8 +44,8 @@ const userSchema = new mongoose.Schema<UserDocument>(
   { timestamps: true }
 );
 
-userSchema.pre("save", async (next) => {
-  const user = this as unknown as UserDocument;
+userSchema.pre("save", async function (next) {
+  const user = this as UserDocument;
 
   if (!user.isModified("password")) {
     return next();
@@ -56,8 +56,8 @@ userSchema.pre("save", async (next) => {
   return next();
 });
 
-userSchema.methods.comparePassword = async (plainPassword: string) => {
-  const user = this as unknown as UserDocument;
+userSchema.methods.comparePassword = async function (plainPassword: string) {
+  const user = this as UserDocument;
   return await argon2.verify(user.password, plainPassword);
 };
 
