@@ -6,6 +6,7 @@ import compression from "compression";
 import { config } from "./config";
 import morgan from "morgan";
 import { ApiError } from "./utils/api-error";
+import { authRoutes } from "./routes/auth.route";
 
 const app = express();
 
@@ -30,6 +31,9 @@ app.use(compression());
 if (config.env === "development") {
   app.use(morgan("dev"));
 }
+
+// Routes
+app.use("/api/v1/auth", authRoutes);
 
 // 404 Handler
 app.use((_req, _res, next) => {

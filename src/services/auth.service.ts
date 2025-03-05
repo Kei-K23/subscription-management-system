@@ -1,7 +1,7 @@
 import { config } from "@/config";
 import { IUser, User } from "@/models/user.model";
 import { ApiError } from "@/utils/api-error";
-import jwt, { SignOptions } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 export class AuthService {
   static async register(user: Partial<IUser>): Promise<IUser> {
