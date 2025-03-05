@@ -13,11 +13,11 @@ export class AuthController {
   });
 
   static login = catchAsync(async (req: Request, res: Response) => {
-    const loginData = await AuthService.login(req.body);
+    const { user, token } = await AuthService.login(req.body);
 
     res.status(201).json({
       status: "success",
-      data: { loginData },
+      data: { user, token },
     });
   });
 }

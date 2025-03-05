@@ -7,7 +7,10 @@ const envSchema = z.object({
   PORT: z.string().default("3000"),
   MONGODB_URI: z.string(),
   JWT_SECRET: z.string(),
-  JWT_EXPIRES_IN: z.number().default(604800000),
+  JWT_EXPIRES_IN: z.preprocess(
+    (val) => Number(val),
+    z.number().default(604800000)
+  ),
 });
 
 const envVars = envSchema.safeParse(process.env);
