@@ -1,4 +1,5 @@
 import { UserController } from "@/controllers/user.controller";
+import { authenticate, authorize } from "@/middlewares/auth.middleware";
 import { resourceValidate } from "@/middlewares/resource-validate.middleware";
 import {
   userCreateSchema,
@@ -11,10 +12,17 @@ const router = Router();
 
 router.post("/", resourceValidate(userCreateSchema), UserController.createUser);
 router.get("/", UserController.getAllUsers);
+router.get("/me", authenticate, UserController.getMe);
 router.get(
   "/:id",
   resourceValidate(userParamIdSchema),
   UserController.getUserById
+);
+router.patch(
+  "/me",
+  authenticate,
+  resourceValidate(userUpdateSchema),
+  UserController.updateMe
 );
 router.patch(
   "/:id",
@@ -22,6 +30,7 @@ router.patch(
   resourceValidate(userUpdateSchema),
   UserController.updateUser
 );
+router.delete("/me", authenticate, UserController.deleteMe);
 router.delete(
   "/:id",
   resourceValidate(userParamIdSchema),
