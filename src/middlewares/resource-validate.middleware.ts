@@ -1,6 +1,6 @@
 import { ApiError } from "@/utils/api-error";
 import { NextFunction, Request, Response } from "express";
-import { AnyZodObject } from "zod";
+import { AnyZodObject, ZodError } from "zod";
 
 export const resourceValidate =
   (schema: AnyZodObject) =>
@@ -14,6 +14,10 @@ export const resourceValidate =
 
       next();
     } catch (error) {
-      next(new ApiError(400, "Validation error"));
+      if (error instanceof ZodError) {
+        next(new ApiError(400, "Validation error", true, error.errors));
+      } else {
+        next(new ApiError(400, "Validation error"));
+      }
     }
   };
