@@ -10,11 +10,19 @@ import { Router } from "express";
 
 const router = Router();
 
-router.post("/", resourceValidate(userCreateSchema), UserController.createUser);
-router.get("/", UserController.getAllUsers);
+router.post(
+  "/",
+  authenticate,
+  authorize(["ADMIN"]),
+  resourceValidate(userCreateSchema),
+  UserController.createUser
+);
+router.get("/", authenticate, authorize(["ADMIN"]), UserController.getAllUsers);
 router.get("/me", authenticate, UserController.getMe);
 router.get(
   "/:id",
+  authenticate,
+  authorize(["ADMIN"]),
   resourceValidate(userParamIdSchema),
   UserController.getUserById
 );
@@ -26,6 +34,8 @@ router.patch(
 );
 router.patch(
   "/:id",
+  authenticate,
+  authorize(["ADMIN"]),
   resourceValidate(userParamIdSchema),
   resourceValidate(userUpdateSchema),
   UserController.updateUser
@@ -33,6 +43,8 @@ router.patch(
 router.delete("/me", authenticate, UserController.deleteMe);
 router.delete(
   "/:id",
+  authenticate,
+  authorize(["ADMIN"]),
   resourceValidate(userParamIdSchema),
   UserController.deleteUser
 );
