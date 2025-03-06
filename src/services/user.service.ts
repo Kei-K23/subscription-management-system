@@ -19,23 +19,26 @@ export class UserService {
     return user;
   }
 
-  static async updateUser(id: string, updateUser: Partial<IUser>) {
-    const user = await User.findById(id);
-    if (!user) {
+  static async updateUser(id: string, updateUserInput: Partial<IUser>) {
+    const updatedUser = await User.findByIdAndUpdate(id, updateUserInput, {
+      new: true,
+      runValidators: true,
+    });
+    if (!updatedUser) {
       throw new ApiError(404, "User not found");
     }
 
-    return await User.findByIdAndUpdate(id, updateUser, {
-      new: true,
-    });
+    return updatedUser;
   }
 
   static async deleteUser(id: string) {
-    const user = await User.findById(id);
-    if (!user) {
+    const deletedUser = await User.findByIdAndDelete(id, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!deletedUser) {
       throw new ApiError(404, "User not found");
     }
-
-    await User.findByIdAndDelete(id);
   }
 }
