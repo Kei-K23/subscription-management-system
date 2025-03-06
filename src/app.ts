@@ -8,6 +8,7 @@ import morgan from "morgan";
 import { ApiError } from "./utils/api-error";
 import { authRoutes } from "./routes/auth.route";
 import { userRoutes } from "./routes/user.route";
+import { planRoutes } from "./routes/plan.route";
 
 const app = express();
 
@@ -36,6 +37,7 @@ if (config.env === "development") {
 // Routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/plans", planRoutes);
 
 // 404 Handler
 app.use((_req, _res, next) => {
