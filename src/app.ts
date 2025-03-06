@@ -9,6 +9,7 @@ import { ApiError } from "./utils/api-error";
 import { authRoutes } from "./routes/auth.route";
 import { userRoutes } from "./routes/user.route";
 import { planRoutes } from "./routes/plan.route";
+import { subscriptionRoutes } from "./routes/subscription.route";
 
 const app = express();
 
@@ -38,6 +39,7 @@ if (config.env === "development") {
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/plans", planRoutes);
+app.use("/api/v1/subscriptions", subscriptionRoutes);
 
 // 404 Handler
 app.use((_req, _res, next) => {
