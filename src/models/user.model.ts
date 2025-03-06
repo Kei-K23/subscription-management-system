@@ -16,22 +16,23 @@ const userSchema = new mongoose.Schema<IUser>(
   {
     name: {
       type: String,
-      required: true,
+      required: [true, "Name is required"],
       trim: true,
+      minlength: [3, "Name must be at least 3 characters long"],
     },
     email: {
       type: String,
-      required: true,
+      required: [true, "Email is required"],
       trim: true,
       unique: true,
       lowercase: true,
     },
     password: {
       type: String,
-      required: true,
+      required: [true, "Password is required"],
       trim: true,
-      minlength: 6,
-      maxlength: 18,
+      minlength: [6, "Password must be at least 6 characters long"],
+      select: false,
     },
     role: {
       type: String,

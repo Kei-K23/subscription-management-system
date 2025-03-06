@@ -15,7 +15,7 @@ const planSchema = new mongoose.Schema<IPlan>(
   {
     name: {
       type: String,
-      required: true,
+      required: [true, "Name is required"],
       unique: true,
     },
     description: {
@@ -23,6 +23,7 @@ const planSchema = new mongoose.Schema<IPlan>(
     },
     price: {
       type: Number,
+      required: [true, "Price is required"],
       validate: {
         validator: function (value: number) {
           return value > 0;
@@ -32,6 +33,7 @@ const planSchema = new mongoose.Schema<IPlan>(
     },
     billingCycle: {
       type: String,
+      required: [true, "Billing cycle is required"],
       enum: ["MONTHLY", "YEARLY"],
     },
     features: {
