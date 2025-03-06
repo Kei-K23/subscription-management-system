@@ -1,5 +1,6 @@
-import mongoose, { Document } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 import bcrypt from "bcryptjs";
+import { ISubscription } from "./subscription.model";
 
 export interface IUser extends Document {
   name: string;
@@ -9,6 +10,7 @@ export interface IUser extends Document {
   isEmailVerified?: boolean;
   createdAt: Date;
   updatedAt: Date;
+  subscriptions?: ISubscription[];
   comparePassword(plainPass: string): Promise<boolean>;
 }
 
@@ -43,6 +45,14 @@ const userSchema = new mongoose.Schema<IUser>(
       type: Boolean,
       default: false,
     },
+    subscriptions: [
+      {
+        subscription: {
+          type: Schema.Types.ObjectId,
+          ref: "Subscription",
+        },
+      },
+    ],
   },
   {
     timestamps: true,

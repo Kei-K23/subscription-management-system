@@ -1,18 +1,17 @@
 import mongoose, { Schema, Types } from "mongoose";
 
-export interface IPayment {
+export interface IInvoice {
   user: Types.ObjectId;
   subscription: Types.ObjectId;
   amount: number;
   currency: string;
-  status: "PENDING" | "SUCCESS" | "FAILED" | "REFUNDED";
-  transactionId: string;
-  paymentGateway: "STRIPE" | "PAYPAL";
+  dueDate: Date;
+  status: "PAID" | "UNPAID" | "OVERDUE";
   createdAt: Date;
   updatedAt: Date;
 }
 
-const paymentSchema = new mongoose.Schema<IPayment>(
+const invoiceSchema = new mongoose.Schema<IInvoice>(
   {
     user: {
       type: Schema.Types.ObjectId,
@@ -40,18 +39,9 @@ const paymentSchema = new mongoose.Schema<IPayment>(
     },
     status: {
       type: String,
-      enum: ["PENDING", "SUCCESS", "FAILED", "REFUNDED"],
+      enum: ["PAID", "UNPAID", "OVERDUE"],
       required: [true, "Status is required"],
-      default: "PENDING",
-    },
-    transactionId: {
-      type: String,
-      required: [true, "Transaction ID is required"],
-    },
-    paymentGateway: {
-      type: String,
-      enum: ["STRIPE", "PAYPAL"],
-      required: true,
+      default: "UNPAID",
     },
   },
   {
@@ -59,4 +49,4 @@ const paymentSchema = new mongoose.Schema<IPayment>(
   }
 );
 
-export const Payment = mongoose.model<IPayment>("Payment", paymentSchema);
+export const Invoice = mongoose.model<IInvoice>("Invoice", invoiceSchema);

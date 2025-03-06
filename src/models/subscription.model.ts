@@ -1,4 +1,5 @@
-import mongoose, { Types } from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
+import { type } from "os";
 
 export interface ISubscription {
   user: Types.ObjectId;
@@ -7,6 +8,8 @@ export interface ISubscription {
   startDate: Date;
   endDate: Date;
   nextBillingDate: Date;
+  autoRenew?: boolean;
+  paymentMethod: "CREDIT_CARD" | "PAYPAL" | "STRIPE"; // Currently only support Strip integration
   paymentHistory: {
     amount: number;
     date: Date;
@@ -45,20 +48,15 @@ const subscriptionSchema = new mongoose.Schema<ISubscription>(
       type: Date,
       required: [true, "Next billing date is required"],
     },
+    autoRenew: {
+      type: Boolean,
+      default: true,
+    },
     paymentHistory: [
       {
-        amount: {
-          type: Number,
-          required: [true, "Payment history amount is required"],
-        },
-        date: {
-          type: Date,
-          required: [true, "Payment history date is required"],
-        },
-        status: {
-          type: String,
-          enum: ["SUCCESS", "FAILED"],
-          required: [true, "Payment history status is required"],
+        payment: {
+          type: Schema.Types.ObjectId,
+          ref: "Payment",
         },
       },
     ],
