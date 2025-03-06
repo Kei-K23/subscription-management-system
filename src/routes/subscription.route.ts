@@ -9,10 +9,11 @@ import { Router } from "express";
 const router = Router();
 
 router.post(
-  "/",
+  "/checkout",
   resourceValidate(subscriptionCreateSchema),
   SubscriptionController.createSubscription
 );
+router.post("/webhook", SubscriptionController.handleStripeWebhook);
 router.get("/", SubscriptionController.getAllSubscriptions);
 router.get(
   "/:id",

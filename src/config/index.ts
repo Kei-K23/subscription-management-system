@@ -11,6 +11,7 @@ const envSchema = z.object({
     (val) => Number(val),
     z.number().default(604800000)
   ),
+  STRIPE_SECRET_KEY: z.string(),
 });
 
 const envVars = envSchema.safeParse(process.env);
@@ -29,5 +30,8 @@ export const config = {
   jwt: {
     secret: envVars.data.JWT_SECRET,
     expiresIn: envVars.data.JWT_EXPIRES_IN,
+  },
+  stripe: {
+    secret: envVars.data.STRIPE_SECRET_KEY,
   },
 };

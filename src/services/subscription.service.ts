@@ -2,8 +2,8 @@ import { Plan } from "@/models/plan.model";
 import { ISubscription, Subscription } from "@/models/subscription.model";
 import { ApiError } from "@/utils/api-error";
 import { addMonths, addYears } from "date-fns";
-import { PaymentService } from "./payment.service";
 import { Types } from "mongoose";
+import { stripe } from "@/utils/stripe";
 
 export class SubscriptionService {
   static async createSubscription({
@@ -45,37 +45,45 @@ export class SubscriptionService {
 
     const nextBillingDate = subscriptionEndDate;
 
-    // Call Stripe webhook
-    const paymentStatus = "SUCCESS";
+    // Create a Stripe Checkout session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: plan.name,
+              description: plan.description,
+            },
+            unit_amount: plan.price * 100, // Amount in cents
+            recurring: {
+              interval: plan.billingCycle === "MONTHLY" ? "month" : "year", // Set billing cycle
+              interval_count: 1, // 1 month or 1 year
+            },
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "subscription", // This indicates a subscription checkout
+      success_url: `http://localhost:3000/subscription-success`, // Redirect URL on success
+      cancel_url: `http://localhost:3000/subscription-cancelled`, // Redirect URL on cancellation
+      metadata: {
+        userId,
+        planId,
+      },
+    });
 
-    // TODO : Need to call payment gateway (e.g Stripe)
-    // TODO : Need to call payment service
-
-    const subscription = await Subscription.create({
+    await Subscription.create({
       user: new Types.ObjectId(userId),
       plan: new Types.ObjectId(planId),
       startDate: subscriptionStartDate,
       endDate: subscriptionEndDate,
       nextBillingDate,
       paymentMethod: "STRIPE",
-      status: paymentStatus === "SUCCESS" ? "ACTIVE" : "PENDING",
     });
 
-    // Call payment service
-    const payment = await PaymentService.createPayment({
-      subscription: subscription.id,
-      user: new Types.ObjectId(userId),
-      amount: plan.price,
-      currency: "USD",
-      status: paymentStatus,
-      paymentGateway: "STRIPE",
-      transactionId: `fake-${Date.now()}`,
-    });
-
-    subscription.paymentHistory.push(payment.id);
-    await subscription.save();
-
-    return subscription;
+    return { checkoutUrl: session.url };
   }
 
   static async getAllSubscriptions() {
@@ -84,9 +92,18 @@ export class SubscriptionService {
 
   static async getSubscriptionById(id: string) {
     const subscription = await Subscription.findById(id)
-      .populate("user")
-      .populate("plan")
-      .populate("paymentHistory");
+      .populate({
+        path: "user",
+        model: "User",
+      })
+      .populate({
+        path: "plan",
+        model: "Plan",
+      })
+      .populate({
+        path: "paymentHistory",
+        model: "Payment",
+      });
 
     if (!subscription) {
       throw new ApiError(404, "Subscription not found");
