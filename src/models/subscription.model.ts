@@ -1,20 +1,16 @@
 import mongoose, { Schema, Types } from "mongoose";
-import { type } from "os";
+import { IPayment } from "./payment.model";
 
 export interface ISubscription {
   user: Types.ObjectId;
   plan: Types.ObjectId;
-  status: "ACTIVE" | "CANCELED" | "EXPIRED";
+  status: "ACTIVE" | "CANCELED" | "EXPIRED" | "PENDING";
   startDate: Date;
   endDate: Date;
   nextBillingDate: Date;
   autoRenew?: boolean;
   paymentMethod: "CREDIT_CARD" | "PAYPAL" | "STRIPE"; // Currently only support Strip integration
-  paymentHistory: {
-    amount: number;
-    date: Date;
-    status: "SUCCESS" | "FAILED";
-  };
+  paymentHistory: IPayment[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,7 +29,7 @@ const subscriptionSchema = new mongoose.Schema<ISubscription>(
     },
     status: {
       type: String,
-      enum: ["ACTIVE", "CANCELED", "EXPIRED"],
+      enum: ["ACTIVE", "CANCELED", "EXPIRED", "PENDING"],
       default: "ACTIVE",
     },
     startDate: {
@@ -54,10 +50,8 @@ const subscriptionSchema = new mongoose.Schema<ISubscription>(
     },
     paymentHistory: [
       {
-        payment: {
-          type: Schema.Types.ObjectId,
-          ref: "Payment",
-        },
+        type: Schema.Types.ObjectId,
+        ref: "Payment",
       },
     ],
   },
