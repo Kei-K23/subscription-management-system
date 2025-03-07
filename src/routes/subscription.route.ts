@@ -13,8 +13,16 @@ router.post(
   resourceValidate(subscriptionCreateSchema),
   SubscriptionController.createSubscription
 );
-router.post("/webhook", SubscriptionController.handleStripeWebhook);
+
 router.get("/", SubscriptionController.getAllSubscriptions);
+router.get(
+  "/subscription-success",
+  SubscriptionController.subscriptionSuccessHandler
+);
+router.get(
+  "/subscription-failed",
+  SubscriptionController.subscriptionFailedHandler
+);
 router.get(
   "/:id",
   resourceValidate(subscriptionParamIdSchema),

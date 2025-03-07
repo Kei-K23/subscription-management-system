@@ -1,4 +1,4 @@
-import express, { urlencoded, json } from "express";
+import express, { urlencoded, json, raw } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
@@ -10,6 +10,7 @@ import { authRoutes } from "./routes/auth.route";
 import { userRoutes } from "./routes/user.route";
 import { planRoutes } from "./routes/plan.route";
 import { subscriptionRoutes } from "./routes/subscription.route";
+import { SubscriptionController } from "./controllers/subscription.controller";
 
 const app = express();
 
@@ -23,10 +24,6 @@ app.use(
   })
 );
 
-// Request body parsing Middlewares
-app.use(json());
-app.use(urlencoded({ extended: true }));
-
 // Compression Middleware
 app.use(compression());
 
@@ -34,6 +31,18 @@ app.use(compression());
 if (config.env === "development") {
   app.use(morgan("dev"));
 }
+
+// Webhook routes
+// Use Stripe Checkout webhook
+app.post(
+  "/api/v1/webhooks/subscriptions/checkout",
+  raw({ type: "application/json" }),
+  SubscriptionController.handleStripeWebhook
+);
+
+// Request body parsing Middlewares
+app.use(json());
+app.use(urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/v1/auth", authRoutes);

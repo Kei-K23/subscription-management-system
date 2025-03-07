@@ -4,6 +4,7 @@ import { ApiError } from "@/utils/api-error";
 import { addMonths, addYears } from "date-fns";
 import { Types } from "mongoose";
 import { stripe } from "@/utils/stripe";
+import { config } from "@/config";
 
 export class SubscriptionService {
   static async createSubscription({
@@ -45,6 +46,7 @@ export class SubscriptionService {
 
     const nextBillingDate = subscriptionEndDate;
 
+    // TODO Modify Stripe checkout session to handle subscription base or one month payment
     // Create a Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -66,8 +68,8 @@ export class SubscriptionService {
         },
       ],
       mode: "subscription", // This indicates a subscription checkout
-      success_url: `http://localhost:3000/subscription-success`, // Redirect URL on success
-      cancel_url: `http://localhost:3000/subscription-cancelled`, // Redirect URL on cancellation
+      success_url: `${config.appUrl}/api/v1/subscriptions/subscription-success`,
+      cancel_url: `${config.appUrl}/api/v1/subscriptions/subscription-failed`,
       metadata: {
         userId,
         planId,

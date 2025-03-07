@@ -5,6 +5,7 @@ import "dotenv/config";
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production"]).default("development"),
   PORT: z.string().default("3000"),
+  APP_URL: z.string().default("http://localhost:3000"),
   MONGODB_URI: z.string(),
   JWT_SECRET: z.string(),
   JWT_EXPIRES_IN: z.preprocess(
@@ -12,6 +13,7 @@ const envSchema = z.object({
     z.number().default(604800000)
   ),
   STRIPE_SECRET_KEY: z.string(),
+  STRIPE_WEBHOOK_SECRET: z.string(),
 });
 
 const envVars = envSchema.safeParse(process.env);
@@ -22,6 +24,7 @@ if (!envVars.success) {
 }
 
 export const config = {
+  appUrl: envVars.data.APP_URL,
   port: envVars.data.PORT,
   env: envVars.data.NODE_ENV,
   mongoose: {
@@ -33,5 +36,6 @@ export const config = {
   },
   stripe: {
     secret: envVars.data.STRIPE_SECRET_KEY,
+    webSecret: envVars.data.STRIPE_WEBHOOK_SECRET,
   },
 };

@@ -1,3 +1,4 @@
+import { config } from "@/config";
 import { Plan } from "@/models/plan.model";
 import { Subscription } from "@/models/subscription.model";
 import { PaymentService } from "@/services/payment.service";
@@ -66,16 +67,21 @@ export class SubscriptionController {
   static handleStripeWebhook = catchAsync(
     async (req: Request, res: Response) => {
       const sig = req.headers["stripe-signature"]!;
-      const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+      const endpointSecret = config.stripe.webSecret;
+      // Explicitly Convert req.body to a Buffer
+      const payload = Buffer.isBuffer(req.body)
+        ? req.body
+        : Buffer.from(JSON.stringify(req.body));
 
       const event = stripe.webhooks.constructEvent(
-        req.body,
+        payload,
         sig,
         endpointSecret
       );
 
       if (event.type === "checkout.session.completed") {
         const session = event.data.object as Stripe.Checkout.Session;
+        const isSubscription = !!session.subscription;
 
         // Retrieve the subscription ID from metadata
         const { userId, planId } = session.metadata as {
@@ -90,14 +96,18 @@ export class SubscriptionController {
         }
 
         // Find the subscription and update status to "ACTIVE"
-        const subscription = await Subscription.findOneAndUpdate(
+        const subscription = await Subscription.findOne(
           { user: userId, plan: planId, status: "PENDING" },
-          { status: "ACTIVE" },
           { new: true, runValidators: true }
         );
 
         if (!subscription) {
           throw new ApiError(404, "Subscription not found");
+        }
+
+        // Ensure paymentHistory is initialized as an array
+        if (!subscription.paymentHistory) {
+          subscription.paymentHistory = [];
         }
 
         // Optionally, create a payment record (similar to previous code)
@@ -108,9 +118,12 @@ export class SubscriptionController {
           currency: "USD",
           status: "SUCCESS",
           paymentGateway: "STRIPE",
-          transactionId: session.payment_intent as string,
+          transactionId: (isSubscription
+            ? session.subscription
+            : session.payment_intent) as string,
         });
 
+        subscription.status = "ACTIVE";
         subscription.paymentHistory.push(payment.id);
         await subscription.save();
 
@@ -126,4 +139,18 @@ export class SubscriptionController {
       }
     }
   );
+
+  static subscriptionSuccessHandler = async (_req: Request, res: Response) => {
+    res.status(200).json({
+      status: "success",
+      message: "Subscription process successful",
+    });
+  };
+
+  static subscriptionFailedHandler = async (_req: Request, res: Response) => {
+    res.status(500).json({
+      status: "error",
+      message: "Subscription failed",
+    });
+  };
 }
