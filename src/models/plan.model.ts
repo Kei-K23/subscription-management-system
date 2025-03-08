@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
 
-export interface IPlan {
+export interface IPlan extends Document {
   name: string;
   description: string;
   price: number;

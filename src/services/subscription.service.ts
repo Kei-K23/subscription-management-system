@@ -59,15 +59,11 @@ export class SubscriptionService {
               description: plan.description,
             },
             unit_amount: plan.price * 100, // Amount in cents
-            recurring: {
-              interval: plan.billingCycle === "MONTHLY" ? "month" : "year", // Set billing cycle
-              interval_count: 1, // 1 month or 1 year
-            },
           },
           quantity: 1,
         },
       ],
-      mode: "subscription", // This indicates a subscription checkout
+      mode: "payment",
       success_url: `${config.appUrl}/api/v1/subscriptions/subscription-success`,
       cancel_url: `${config.appUrl}/api/v1/subscriptions/subscription-failed`,
       metadata: {

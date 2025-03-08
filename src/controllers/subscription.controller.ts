@@ -1,6 +1,8 @@
 import { config } from "@/config";
+import { Invoice } from "@/models/invoice.module";
 import { Plan } from "@/models/plan.model";
 import { Subscription } from "@/models/subscription.model";
+import { InvoiceService } from "@/services/invoice.service";
 import { PaymentService } from "@/services/payment.service";
 import { SubscriptionService } from "@/services/subscription.service";
 import { ApiError } from "@/utils/api-error";
@@ -115,7 +117,7 @@ export class SubscriptionController {
           subscription: subscription.id,
           user: new Types.ObjectId(userId),
           amount: plan.price,
-          currency: "USD",
+          currency: session.currency || "",
           status: "SUCCESS",
           paymentGateway: "STRIPE",
           transactionId: (isSubscription
@@ -126,6 +128,16 @@ export class SubscriptionController {
         subscription.status = "ACTIVE";
         subscription.paymentHistory.push(payment.id);
         await subscription.save();
+
+        // Create invoice for successful subscription
+        await InvoiceService.createInvoice({
+          user: new Types.ObjectId(userId),
+          subscription: subscription.id,
+          amount: plan.price,
+          currency: session.currency || "",
+          dueDate: subscription.endDate,
+          status: "PAID",
+        });
 
         res.status(200).send({
           status: "success",

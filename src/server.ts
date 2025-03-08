@@ -3,6 +3,9 @@ import { config } from "./config";
 import { app } from "./app";
 import { Server } from "http";
 
+// Start the cron job
+import "./cronJobs/index";
+
 let server: Server;
 
 // MongoDB connection

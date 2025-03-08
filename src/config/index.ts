@@ -14,6 +14,8 @@ const envSchema = z.object({
   ),
   STRIPE_SECRET_KEY: z.string(),
   STRIPE_WEBHOOK_SECRET: z.string(),
+  EMAIL_USER: z.string(),
+  EMAIL_PASS: z.string(),
 });
 
 const envVars = envSchema.safeParse(process.env);
@@ -37,5 +39,9 @@ export const config = {
   stripe: {
     secret: envVars.data.STRIPE_SECRET_KEY,
     webSecret: envVars.data.STRIPE_WEBHOOK_SECRET,
+  },
+  email: {
+    user: envVars.data.EMAIL_USER,
+    password: envVars.data.EMAIL_PASS,
   },
 };

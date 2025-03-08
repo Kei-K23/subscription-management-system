@@ -6,7 +6,7 @@ export interface IInvoice {
   amount: number;
   currency: string;
   dueDate: Date;
-  status: "PAID" | "UNPAID" | "OVERDUE";
+  status: "PAID" | "UNPAID" | "EXPIRED" | "ALERT";
   createdAt: Date;
   updatedAt: Date;
 }
